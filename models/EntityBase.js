@@ -6,7 +6,7 @@ var EntityBase = new keystone.List('EntityBase', {
 	});
 
 EntityBase.add({
-		name: { type: String, required: true },
+		name: { type: String },
 		slug: { type: String, readonly: true },
 		createdAt: { type: Date, default: Date.now },
 	}
