@@ -2,7 +2,6 @@ var keystone = require('keystone');
 var Types = keystone.Field.Types;
 
 var Price = new keystone.List('Price', {
-	inherits: EntityBase,
 	singular: 'Price',
 	plural: 'Prices',
 	autokey: { from: 'name', path: 'slug', unique: true },
@@ -10,7 +9,7 @@ var Price = new keystone.List('Price', {
 
 Price.add({
 	heroImage: { type: Types.CloudinaryImage },
-	excludeDates: { type: Types.Dates },
+	excludeDates: { type: Types.Date },
 	production: { type: Types.Relationship, initial: true, ref: 'Production', index: true },
 });
 
