@@ -57,9 +57,9 @@ Thing.add(
 }, 'Relationships', {
 	user: { type: Types.Relationship, ref: 'User', initial: true },
 	users: { type: Types.Relationship, ref: 'User', many: true },
-	nested: {
-		posts: { type: Types.Relationship, ref: 'Post' },
-	},
+	// nested: {
+	// 	posts: { type: Types.Relationship, ref: 'Post' },
+	// },
 }, 'Uneditable Fields', {
 	uneditableString: { type: String, noedit: true, default: "Not editable" },
 	uneditableCheckbox: { type: Boolean, noedit: true, default: true },

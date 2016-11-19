@@ -32,5 +32,5 @@ Theatre.schema.pre('save', function(next) {
 });
 
 Theatre.track = true;
-Price.defaultColumns = 'name, createdAt|20%, lastUpdated|20%';
+Theatre.defaultColumns = 'name, createdAt|20%, lastUpdated|20%';
 Theatre.register();
