@@ -73,4 +73,6 @@ Thing.schema.virtual('otherSelectValue').get(function () {
 });
 
 Thing.track = true;
+
+Thing.defaultColumns = 'name, dateTime'
 Thing.register();

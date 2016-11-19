@@ -9,7 +9,7 @@ var Production = new keystone.List('Production', {
     defaultSort: '-lastUpdated',
 });
 
-Production.add({
+Production.add('Basics', {
 	name: { type: String, required: true },
 	url: { type: Types.Url },
 	heroImage: { type: Types.CloudinaryImage },
@@ -17,6 +17,12 @@ Production.add({
 	closingDate: { type: Types.Date },
 	show: { type: Types.Relationship, initial: true, ref: 'Show', index: true },
 	theatre: { type: Types.Relationship, initial: true, ref: 'Theatre', index: true },
+}, 'Socials', {
+	facebook: { type: String, width: 'small' },
+	twitter: { type: String, width: 'small' },
+	instagram: { type: String, width: 'small' },
+	sourceUrl: { type: Types.Url },
+	//Base
 	lastUpdated: { type: Types.Datetime, default: Date.now, hidden: true },
 	createdAt: { type: Types.Datetime, default: Date.now, hidden: true },
 });

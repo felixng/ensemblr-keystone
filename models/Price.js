@@ -11,11 +11,13 @@ var Price = new keystone.List('Price', {
 
 Price.add({
 	name: { type: String },
-	excludeDates: { type: Types.Date },
 	production: { type: Types.Relationship, initial: true, ref: 'Production', index: true },
-	excludedDays: { type: Types.Select, options: 'draft, published, archived', default: 'draft' },
-	// testTextArray: { type: Types.TextArray },
-	amount: { type: Types.Money, currency: 'en-gb' },
+	excludeDates: { type: Types.Date },
+	excludedDays: { type: Types.Relationship, ref: 'WeekDay', many: true },
+	faceValue: { type: Types.Money, currency: 'en-gb' },
+	groupPrice: { type: Types.Money, currency: 'en-gb' },
+	minGroupNumber: { type: Number },
+	//Base
 	lastUpdated: { type: Types.Datetime, default: Date.now, hidden: true },
 	createdAt: { type: Types.Datetime, default: Date.now, hidden: true },
 });
