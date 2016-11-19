@@ -22,6 +22,7 @@ Show.relationship({ path: 'productions', ref: 'Production', refPath: 'show' });
 
 Show.schema.pre('save', function(next) {
 	this.lastUpdated = new Date();
+	next();
 });
 
 Show.track = true;

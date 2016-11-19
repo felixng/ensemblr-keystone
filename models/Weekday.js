@@ -19,6 +19,7 @@ Weekday.add({
 
 Weekday.schema.pre('save', function(next) {
 	this.lastUpdated = new Date();
+	next();
 });
 
 Weekday.relationship({ path: 'prices', ref: 'Price', refPath: 'price' });

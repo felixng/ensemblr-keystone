@@ -25,6 +25,7 @@ Price.add({
 
 Price.schema.pre('save', function(next) {
 	this.lastUpdated = new Date();
+	next();
 });
 
 Price.track = true;

@@ -30,6 +30,7 @@ Theatre.relationship({ path: 'productions', ref: 'Production', refPath: 'theatre
 
 Theatre.schema.pre('save', function(next) {
 	this.lastUpdated = new Date();
+	next();
 });
 
 Theatre.track = true;

@@ -31,6 +31,7 @@ Production.relationship({ path: 'prices', ref: 'Price', refPath: 'price' });
 
 Production.schema.pre('save', function(next) {
 	this.lastUpdated = new Date();
+	next();
 });
 
 Production.track = true;
