@@ -13,7 +13,7 @@ Price.add({
 	name: { type: String },
 	production: { type: Types.Relationship, initial: true, ref: 'Production', index: true },
 	excludeDates: { type: Types.Date },
-	excludedDays: { type: Types.Relationship, ref: 'WeekDay', many: true },
+	excludedDays: { type: Types.Relationship, ref: 'Weekday', many: true },
 	faceValue: { type: Types.Money, currency: 'en-gb' },
 	groupPrice: { type: Types.Money, currency: 'en-gb' },
 	minGroupNumber: { type: Number },
