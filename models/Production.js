@@ -4,7 +4,8 @@ var Types = keystone.Field.Types;
 var Production = new keystone.List('Production', {
 	singular: 'Production',
 	plural: 'Productions',
-	autokey: { from: 'name', path: 'slug', unique: true },
+	map: { name: 'name' },
+    autokey: { path: 'slug', from: 'name', unique: true },
 });
 
 Production.add({

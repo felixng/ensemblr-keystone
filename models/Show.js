@@ -4,7 +4,8 @@ var Types = keystone.Field.Types;
 var Show = new keystone.List('Show', {
 	singular: 'Show',
 	plural: 'Shows',
-	autokey: { from: 'name', path: 'slug', unique: true },
+	map: { name: 'name' },
+	autokey: { path: 'slug', from: 'name', unique: true },
 });
 
 Show.add({

@@ -9,7 +9,8 @@ var Types = keystone.Field.Types;
 var Theatre = new keystone.List('Theatre', {
 	singular: 'Theatre',
 	plural: 'Theatres',
-	autokey: { from: 'name', path: 'slug', unique: true },
+	map: { name: 'name' },
+    autokey: { path: 'slug', from: 'name' },
 });
 
 Theatre.add({

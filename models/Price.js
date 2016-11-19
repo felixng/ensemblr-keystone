@@ -4,11 +4,12 @@ var Types = keystone.Field.Types;
 var Price = new keystone.List('Price', {
 	singular: 'Price',
 	plural: 'Prices',
-	autokey: { from: 'name', path: 'slug', unique: true },
+	map: { name: 'name' },
+    autokey: { path: 'slug', from: 'name', unique: true },
 });
 
 Price.add({
-	heroImage: { type: Types.CloudinaryImage },
+	name: { type: String },
 	excludeDates: { type: Types.Date },
 	production: { type: Types.Relationship, initial: true, ref: 'Production', index: true },
 });
