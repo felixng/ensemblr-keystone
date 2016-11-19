@@ -6,6 +6,7 @@ var Show = new keystone.List('Show', {
 	plural: 'Shows',
 	map: { name: 'name' },
 	autokey: { path: 'slug', from: 'name', unique: true },
+	defaultSort: '-createdAt',
 });
 
 Show.add({

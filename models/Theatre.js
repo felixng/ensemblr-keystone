@@ -11,6 +11,7 @@ var Theatre = new keystone.List('Theatre', {
 	plural: 'Theatres',
 	map: { name: 'name' },
     autokey: { path: 'slug', from: 'name' },
+    defaultSort: '-createdAt',
 });
 
 Theatre.add({

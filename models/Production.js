@@ -6,6 +6,7 @@ var Production = new keystone.List('Production', {
 	plural: 'Productions',
 	map: { name: 'name' },
     autokey: { path: 'slug', from: 'name', unique: true },
+    createdAt: { type: Date, default: Date.now },
 });
 
 Production.add({
