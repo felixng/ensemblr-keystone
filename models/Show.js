@@ -6,17 +6,24 @@ var Show = new keystone.List('Show', {
 	plural: 'Shows',
 	map: { name: 'name' },
 	autokey: { path: 'slug', from: 'name', unique: true },
-	defaultSort: '-createdAt',
+	defaultSort: '-lastUpdated',
 });
 
 Show.add({
 	name: { type: String, required: true },
 	heroImage: { type: Types.CloudinaryImage },
 	startDate: { type: Types.Date, index: true },
-	createdAt: { type: Date, default: Date.now },
+	lastUpdated: { type: Types.Datetime, default: Date.now, hidden: true },
+	createdAt: { type: Types.Datetime, default: Date.now, hidden: true },
 });
 
 Show.relationship({ path: 'productions', ref: 'Production', refPath: 'show' });
 
+
+Show.schema.pre('save', function(next) {
+	this.lastUpdated = new Date();
+});
+
 Show.track = true;
+Show.defaultColumns = 'name, createdAt|20%, lastUpdated|20%';
 Show.register();
