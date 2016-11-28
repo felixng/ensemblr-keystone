@@ -10,7 +10,7 @@ var Production = new keystone.List('Production', {
 });
 
 Production.add('Basics', {
-	name: { type: String, required: true },
+	name: { type: String, required: true, unique: true},
 	url: { type: Types.Url },
 	heroImage: { type: Types.CloudinaryImage },
 	openingDate: { type: Types.Date },

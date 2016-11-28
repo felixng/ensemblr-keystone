@@ -74,5 +74,5 @@ keystone.set('nav', {
 keystone.start();
 
 var cron = require('./cron.js');
-cron.theatres();
+cron.runJobs();
 

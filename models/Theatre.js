@@ -15,7 +15,7 @@ var Theatre = new keystone.List('Theatre', {
 });
 
 Theatre.add({
-	name: { type: String, required: true },
+	name: { type: String, required: true, unique: true},
 	heroImage: { type: Types.CloudinaryImage },
 	images: { type: Types.CloudinaryImages },
 	url: { type: Types.Url },

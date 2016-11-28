@@ -10,7 +10,7 @@ var Show = new keystone.List('Show', {
 });
 
 Show.add({
-	name: { type: String, required: true },
+	name: { type: String, required: true, unique: true },
 	heroImage: { type: Types.CloudinaryImage },
 	startDate: { type: Types.Date, index: true },
 	//Base
