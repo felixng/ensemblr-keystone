@@ -17,7 +17,6 @@ Production.add('Basics', {
 	closingDate: { type: Types.Date },
 	show: { type: Types.Relationship, initial: true, ref: 'Show', index: true },
 	theatre: { type: Types.Relationship, initial: true, ref: 'Theatre', index: true },
-}, 'Socials', {
 	facebook: { type: String, width: 'small' },
 	twitter: { type: String, width: 'small' },
 	instagram: { type: String, width: 'small' },

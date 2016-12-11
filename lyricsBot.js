@@ -1,6 +1,6 @@
 var keystone = require('keystone');
 var CronJob = require('cron').CronJob;
-var cron = module.exports = {};
+var lyricsBot = module.exports = {};
 
 var Client = require('node-rest-client').Client;
 var client = new Client();
@@ -8,31 +8,6 @@ var client = new Client();
 var args = {
     headers: { "Accept": "application/json" }
 };
-
-
-var createTheatre = function(name, url){
-    var Theatre = keystone.list('Theatre');
-
-    Theatre.model.update({name: name}, {sourceUrl: url}, {upsert: true}, function(err, doc){
-        if(err){
-            console.log("Something wrong when updating data!");
-        }
-
-        console.log(doc);
-    });
-}
-
-var createShow = function(name, url){
-    var Show = keystone.list('Show');
-
-    Show.model.update({name: name}, {sourceUrl: url}, {upsert: true}, function(err, doc){
-        if(err){
-            console.log("Something wrong when updating data!");
-        }
-
-        console.log(doc);
-    });
-}
 
 var createProduction = function(name, url){
     var Production = keystone.list('Production');
@@ -63,8 +38,6 @@ var createProduction = function(show){
 
 var getTheatres = function(){
   console.log('getTheatres');
-  //var url = 'https://data.import.io/extractor/cd74f836-cdbd-4ff1-a327-bdb31f882fc9/json/latest?_apikey=' + process.env.IMPORTIO_API;
-  // var url = 'https://extraction.import.io/query/extractor/cd74f836-cdbd-4ff1-a327-bdb31f882fc9?_apikey=' + process.env.IMPORTIO_API;
   var url = process.env.THEATRE_IMPORTER_URL;
 
   client.get(url, args, function (data, response) {
@@ -109,34 +82,75 @@ var getImportIOShows = function(){
   });
 }
 
-scrapShows = function(){
-  console.log('getting shows from Scrappinghub');
-  var url = process.env.SHOW_URL;
+var removeWordLyric = function(str){
+
+  if (str.toLowerCase().includes("lyric")){
+    var lastIndex = str.lastIndexOf(" ");
+    str = str.substring(0, lastIndex);
+  }
+
+  return str;
+
+}
+
+var parseShow = function(item){
+
+    var show = {
+      name: removeWordLyric(item.name[0]),
+      year: item.year[0],
+      url: item.link[0],
+      sourceUrl: item.url
+    };
+
+    return show;
+}
+
+var parseSong = function(item){
+  
+}
+
+var parseLyrics = function(item){
+  
+}
+
+scrapLyrics = function(){
+  console.log('getting lyrics from Scrappinghub');
+  var url = process.env.LYRICS_URL;
 
   client.get(url, args, function (data, response) {
       var count = Object.keys(data).length;
-      console.log(count);
       for (var i = 0; i < count; i++) {
-          var show = data[i];
+          var item = data[i];
+
+          if (item._type == 'show'){
+            console.log('show');
+            console.log(parseShow(item));
+          }
+
+          if (item._type == 'song'){
+            console.log('song');
+          }
+
+          if (item._type == 'lyrics'){
+            console.log('lyrics');
+          }
 
           // if (shows[i].Link){
           //   var showUrl = shows[i].Link[0].href;  
           // }
           
           //createShow(showName, showUrl);
-          createProduction(show);
+          //createProduction(show);
       };
 
   });
 }
 
-cron.runJobs = function(){
+lyricsBot.getLyrics = function(){
     var job = new CronJob({
       cronTime: '0 * * * * *',
       onTick: function(){
-          // getTheatres();
-          // getShows();
-          scrapShows();
+          scrapLyrics();
       },
       onComplete: function () {
         /* This function is executed when the job stops */
