@@ -20,7 +20,7 @@ LyricShow.add({
 	createdAt: { type: Types.Datetime, default: Date.now, hidden: true },
 });
 
-LyricShow.relationship({ path: 'lyricSongs', ref: 'LyricSong', refPath: 'lyricsong' });
+LyricShow.relationship({ path: 'lyricSongs', ref: 'LyricSong', refPath: 'lyricshow' });
 
 LyricShow.schema.pre('save', function(next) {
 	this.lastUpdated = new Date();

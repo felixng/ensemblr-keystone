@@ -73,10 +73,10 @@ keystone.set('nav', {
 // Start Keystone to connect to your database and initialise the web server
 keystone.start();
 
-// var cron = require('./cron.js');
-// cron.runJobs();
+var cron = require('./cron.js');
+cron.runJobs();
 
-var lyricsBots = require('./lyricsBot.js');
-lyricsBots.getLyrics();
+//var lyricsBots = require('./lyricsBot.js');
+//lyricsBots.getLyrics();
 
 

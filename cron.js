@@ -1,5 +1,6 @@
 var keystone = require('keystone');
 var CronJob = require('cron').CronJob;
+var ImportIO = require('./importio.js');
 var cron = module.exports = {};
 
 var Client = require('node-rest-client').Client;
@@ -9,6 +10,12 @@ var args = {
     headers: { "Accept": "application/json" }
 };
 
+
+var slugify = function(name){
+    var slugExp = /[^a-z]/ig;
+    var slug = name.toLowerCase().replace(slugExp, '-');
+    return slug;
+}
 
 var createTheatre = function(name, url){
     var Theatre = keystone.list('Theatre');
@@ -20,6 +27,25 @@ var createTheatre = function(name, url){
 
         console.log(doc);
     });
+}
+
+var createTheatre = function(theatre){
+    var Theatre = keystone.list('Theatre');
+    var Production = keystone.list('Production');
+
+    Production.model.find().where('name', theatre.currentProduction).exec(function(err, result){
+      if (result.length > 0){
+        theatre.currentProduction = result[0]._id;
+        Theatre.model.update({name: theatre.name}, theatre, {upsert: true}, function(err, doc){
+            if(err){
+                console.log(err);
+            }
+
+            console.log(doc);
+        });  
+      }
+      
+    })
 }
 
 var createShow = function(name, url){
@@ -46,97 +72,111 @@ var createProduction = function(name, url){
     });
 }
 
-var createProduction = function(show){
-    var Production = keystone.list('Production');
+var createProduction = function(theatreInfo){
     var Theatre = keystone.list('Theatre');
+    var Production = keystone.list('Production');
+    console.log("Updating " + theatreInfo.name);
+    
+    Theatre.model.find().where('sourceUrl', theatreInfo.theatreUrl).exec(function(err, result){
+        //console.log(result);
 
-    console.log("Updating " + show.url);
-    show.theatre = Theatre.model.find().where('name', show.theatre);
+        Production.model.update({name: theatreInfo.currentProductionName}, 
+                                {name: theatreInfo.currentProductionName, 
+                                 sourceUrl: theatreInfo.currentProductionUrl,
+                                 slug: theatreInfo.slug, 
+                                 theatre: result[0]._id}, {upsert: true}, function(err, doc){
+            if(err){
+                console.log(err);
+            }
 
-    Production.model.update({name: show.name}, show, {upsert: true}, function(err, doc){
-        if(err){
-            console.log(err);
-        }
-        console.log(doc);
+            console.log(doc);
+        });    
+        
     });
+    
 }
 
 var getTheatres = function(){
   console.log('getTheatres');
-  //var url = 'https://data.import.io/extractor/cd74f836-cdbd-4ff1-a327-bdb31f882fc9/json/latest?_apikey=' + process.env.IMPORTIO_API;
-  // var url = 'https://extraction.import.io/query/extractor/cd74f836-cdbd-4ff1-a327-bdb31f882fc9?_apikey=' + process.env.IMPORTIO_API;
-  var url = process.env.THEATRE_IMPORTER_URL;
+  var url = process.env.THEATRES_IMPORTER_URL;
 
   client.get(url, args, function (data, response) {
-      // parsed response body as js object
-      // var entity = JSON.parse(data[0].name);
-      //console.log(data);
-
       var theatres = data.extractorData.data[0].group;
       var count = Object.keys(theatres).length;
 
       for (var i = 0; i < count; i++) {
-          var found = false;
-          var theatreName = theatres[i].Name[0].text;
-          var theatreUrl = theatres[i].Name[0].href;
-          var Theatre = keystone.list('Theatre');
-          createTheatre(theatreName, theatreUrl);  
+          var theatre = parseTheatre(theatres[i].Name[0]);
+          createTheatre(theatre);  
       };
 
   });
 }
 
-var getImportIOShows = function(){
-  console.log('getShows and Theatre');
-  var url = process.env.SHOW_IMPORTER_URL;
+var populateTheatre = function(){
+  console.log('populateTheatre');
+  
+  var Theatre = keystone.list('Theatre');
+  var extractorId = process.env.IMPORTIO_THEATRE_EXTRACTOR;
+  //Theatre.model.find().where('name', 'Apollo Theatre').exec(function(err, result){
+  Theatre.model.find().exec(function(err, result){
+    result.forEach(function(theatre){
+        var url = ImportIO.parseEndPoint(theatre.sourceUrl, extractorId);
+        //console.log(url);
+        client.get(url, args, function (data, response) {
+          if (data && data.extractorData && data.extractorData.data){
 
-  client.get(url, args, function (data, response) {
-      var shows = data.extractorData.data[0].group;
-      var count = Object.keys(shows).length;
+            var theatreNode = data.extractorData.data[0].group[0];
+            var theatreInfo = parseTheatreInfo(theatreNode);
+            theatreInfo.theatreUrl = data.extractorData.url;
 
-      for (var i = 0; i < count; i++) {
-          var showName = shows[i].Name[0].text;
-          var showUrl = '';
-
-          if (shows[i].Link){
-            var showUrl = shows[i].Link[0].href;  
+            createProduction(theatreInfo); 
           }
-          
-          createShow(showName, showUrl);
-          createProduction(showName, showUrl);
-      };
+          else{
+            console.log(data);
+          }
+            
+        });
+    });
 
-  });
+    
+  })
 }
 
-scrapShows = function(){
-  console.log('getting shows from Scrappinghub');
-  var url = process.env.SHOW_URL;
+var parseTheatreInfo = function(item){
+    //console.log(item);
+    var name = item.Name[0].text;
 
-  client.get(url, args, function (data, response) {
-      var count = Object.keys(data).length;
-      console.log(count);
-      for (var i = 0; i < count; i++) {
-          var show = data[i];
+    var theatreInfo = {
+      name: name,
+      currentProductionName: item.currentShow[0].text,
+      currentProductionUrl: item.currentShow[0].href,
+      slug: slugify(name)
+    }
 
-          // if (shows[i].Link){
-          //   var showUrl = shows[i].Link[0].href;  
-          // }
-          
-          //createShow(showName, showUrl);
-          createProduction(show);
-      };
-
-  });
+    return theatreInfo;
 }
+
+var parseTheatre = function(item){
+    var name = item.text; 
+    // var slug = slugify(name);
+
+    var theatre = {
+      name: item.text,
+      sourceUrl: item.href,
+      // currentProduction: '583b7923772767cfdaa5fbce'
+    };
+
+    return theatre;
+}  
 
 cron.runJobs = function(){
     var job = new CronJob({
       cronTime: '0 * * * * *',
       onTick: function(){
-          // getTheatres();
+          //getTheatres();
+          populateTheatre();
           // getShows();
-          scrapShows();
+          // scrapShows();
       },
       onComplete: function () {
         /* This function is executed when the job stops */

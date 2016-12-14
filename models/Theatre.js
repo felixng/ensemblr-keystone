@@ -20,6 +20,7 @@ Theatre.add({
 	images: { type: Types.CloudinaryImages },
 	url: { type: Types.Url },
 	location: { type: Types.Location, defaults: { country: 'London' }},
+	currentProduction: { type: Types.Relationship, initial: true, ref: 'Production', index: true },
 	sourceUrl: { type: Types.Url },
 	lastUpdated: { type: Types.Datetime, default: Date.now, hidden: true },
 	createdAt: { type: Types.Datetime, default: Date.now, hidden: true },

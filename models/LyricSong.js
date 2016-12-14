@@ -11,6 +11,7 @@ var LyricSong = new keystone.List('LyricSong', {
 
 LyricSong.add({
 	name: { type: String, required: true, unique: true },
+	show: { type: Types.Relationship, initial: true, ref: 'lyricsong', index: true },
 	//Scraphub Base
 	url: { type: Types.Url },
 	sourceUrl: { type: Types.Url },
@@ -19,7 +20,7 @@ LyricSong.add({
 	createdAt: { type: Types.Datetime, default: Date.now, hidden: true },
 });
 
-LyricSong.relationship({ path: 'lyric', ref: 'Lyrics', refPath: 'lyric' });
+LyricSong.relationship({ path: 'lyric', ref: 'Lyrics', refPath: 'lyricsong' });
 
 LyricSong.schema.pre('save', function(next) {
 	this.lastUpdated = new Date();

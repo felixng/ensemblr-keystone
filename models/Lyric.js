@@ -11,6 +11,7 @@ var Lyric = new keystone.List('Lyric', {
 
 Lyric.add({
 	name: { type: String, required: true, unique: true },
+	show: { type: Types.Relationship, initial: true, ref: 'lyricsong', index: true },
 	text: { type: String },
 	//Scraphub Base
 	sourceUrl: { type: Types.Url },

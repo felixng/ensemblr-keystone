@@ -1,6 +1,8 @@
 var keystone = require('keystone');
 var CronJob = require('cron').CronJob;
+var ScrapHub = require('./Scraphub.js');
 var lyricsBot = module.exports = {};
+
 
 var Client = require('node-rest-client').Client;
 var client = new Client();
@@ -9,141 +11,128 @@ var args = {
     headers: { "Accept": "application/json" }
 };
 
-var createProduction = function(name, url){
-    var Production = keystone.list('Production');
-    console.log("Updating " + url);
+var createSong = function(song){
+    var LyricShow = keystone.list('LyricShow');
+    var LyricSong = keystone.list('LyricSong');
 
-    Production.model.update({name: name}, {sourceUrl: url}, {upsert: true}, function(err, doc){
+    console.log("Creating/Updating " + song.sourceUrl);
+
+    LyricShow.model.find().where('url', song.sourceUrl)
+    .exec(function(err, shows) {
+      if (shows.length > 0){
+        console.log(song.name);
+        console.log(shows);
+      }
+    });
+
+    // LyricSong.model.update({name: show.name}, show, {upsert: true}, function(err, doc){
+    //     if(err){
+    //         console.log(err);
+    //     }
+    //     console.log(doc);
+    // });
+}
+
+var createShow = function(show){
+    var LyricShow = keystone.list('LyricShow');
+
+    console.log("Creating/Updating " + show.name);
+
+    LyricShow.model.update({name: show.name}, show, {upsert: true}, function(err, doc){
         if(err){
             console.log(err);
         }
         console.log(doc);
     });
-}
-
-var createProduction = function(show){
-    var Production = keystone.list('Production');
-    var Theatre = keystone.list('Theatre');
-
-    console.log("Updating " + show.url);
-    show.theatre = Theatre.model.find().where('name', show.theatre);
-
-    Production.model.update({name: show.name}, show, {upsert: true}, function(err, doc){
-        if(err){
-            console.log(err);
-        }
-        console.log(doc);
-    });
-}
-
-var getTheatres = function(){
-  console.log('getTheatres');
-  var url = process.env.THEATRE_IMPORTER_URL;
-
-  client.get(url, args, function (data, response) {
-      // parsed response body as js object
-      // var entity = JSON.parse(data[0].name);
-      //console.log(data);
-
-      var theatres = data.extractorData.data[0].group;
-      var count = Object.keys(theatres).length;
-
-      for (var i = 0; i < count; i++) {
-          var found = false;
-          var theatreName = theatres[i].Name[0].text;
-          var theatreUrl = theatres[i].Name[0].href;
-          var Theatre = keystone.list('Theatre');
-          createTheatre(theatreName, theatreUrl);  
-      };
-
-  });
-}
-
-var getImportIOShows = function(){
-  console.log('getShows and Theatre');
-  var url = process.env.SHOW_IMPORTER_URL;
-
-  client.get(url, args, function (data, response) {
-      var shows = data.extractorData.data[0].group;
-      var count = Object.keys(shows).length;
-
-      for (var i = 0; i < count; i++) {
-          var showName = shows[i].Name[0].text;
-          var showUrl = '';
-
-          if (shows[i].Link){
-            var showUrl = shows[i].Link[0].href;  
-          }
-          
-          createShow(showName, showUrl);
-          createProduction(showName, showUrl);
-      };
-
-  });
 }
 
 var removeWordLyric = function(str){
+    if (str.toLowerCase().includes("lyric")){
+      var lastIndex = str.lastIndexOf(" ");
+      str = str.substring(0, lastIndex);
+    }
 
-  if (str.toLowerCase().includes("lyric")){
-    var lastIndex = str.lastIndexOf(" ");
-    str = str.substring(0, lastIndex);
-  }
+    return str;
+}
 
-  return str;
-
+var slugify = function(name){
+    var slugExp = /[^a-z\-]/ig;
+    var slug = name.toLowerCase().replace(slugExp, '-');
+    return slug;
 }
 
 var parseShow = function(item){
+    var name = removeWordLyric(item.name[0]);
+    var slug = slugify(name);
 
     var show = {
-      name: removeWordLyric(item.name[0]),
+      name: name,
       year: item.year[0],
       url: item.link[0],
-      sourceUrl: item.url
+      sourceUrl: item.url,
+      slug: slug
     };
 
     return show;
 }
 
 var parseSong = function(item){
-  
+    var name = removeWordLyric(item.name[0]);
+    var slug = slugify(name);
+
+    var song = {
+      name: name,
+      url: item.link[0],
+      sourceUrl: item.url,
+      slug: slug
+    };
+
+    return song;
 }
 
 var parseLyrics = function(item){
+    var name = removeWordLyric(item.name[0]);
+    var slug = slugify(name);
+
+    var lyric = {
+      name: item.songName,
+      text: item.lyrics,
+      sourceUrl: item.url,
+      slug: slug
+    };
+
+    return lyric;
   
 }
 
 scrapLyrics = function(){
-  console.log('getting lyrics from Scrappinghub');
-  var url = process.env.LYRICS_URL;
+  console.log('Getting Lyrics from Scrappinghub');
+  ScrapHub.itemApiEndPoint(process.env.LYRICS_API_KEY, function(err, url){
+    client.get(url, args, function (data, response) {
+        var count = Object.keys(data).length;
+        for (var i = 0; i < count; i++) {
+            var item = data[i];
 
-  client.get(url, args, function (data, response) {
-      var count = Object.keys(data).length;
-      for (var i = 0; i < count; i++) {
-          var item = data[i];
+            // if (item._type == 'show'){
+            //   console.log('show');
+            //   var show = parseShow(item);
+            //   createShow(show);
+            // }
 
-          if (item._type == 'show'){
-            console.log('show');
-            console.log(parseShow(item));
-          }
+            if (item._type == 'song'){
+              var song = parseSong(item);
+              //console.log(song);
+              createSong(song);
+            }
 
-          if (item._type == 'song'){
-            console.log('song');
-          }
-
-          if (item._type == 'lyrics'){
-            console.log('lyrics');
-          }
-
-          // if (shows[i].Link){
-          //   var showUrl = shows[i].Link[0].href;  
-          // }
-          
-          //createShow(showName, showUrl);
-          //createProduction(show);
-      };
-
+            // if (item._type == 'lyrics'){
+            //   var lyrics = parseLyrics(item);
+            //   console.log(lyrics);
+            // }
+        };
+    });
   });
+  
 }
 
 lyricsBot.getLyrics = function(){
@@ -151,6 +140,7 @@ lyricsBot.getLyrics = function(){
       cronTime: '0 * * * * *',
       onTick: function(){
           scrapLyrics();
+          //ScrapHub.itemApiEndPoint(process.env.LYRICS_API_KEY);
       },
       onComplete: function () {
         /* This function is executed when the job stops */
