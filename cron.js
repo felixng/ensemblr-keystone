@@ -172,7 +172,7 @@ var parseTheatre = function(item){
 
 cron.runJobs = function(){
     var job = new CronJob({
-      cronTime: '0 * * * * *',
+      cronTime: '0 0 * * * *',
       onTick: function(){
           getTheatres();
           populateTheatre();
