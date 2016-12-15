@@ -36,14 +36,15 @@ var createTheatre = function(theatre){
     Production.model.find().where('name', theatre.currentProduction).exec(function(err, result){
       if (result.length > 0){
         theatre.currentProduction = result[0]._id;
-        Theatre.model.update({name: theatre.name}, theatre, {upsert: true}, function(err, doc){
-            if(err){
-                console.log(err);
-            }
-
-            console.log(doc);
-        });  
       }
+
+      Theatre.model.update({name: theatre.name}, theatre, {upsert: true}, function(err, doc){
+          if(err){
+              console.log(err);
+          }
+
+          console.log(doc);
+      });
       
     })
 }
