@@ -67,6 +67,7 @@ keystone.set('email tests', require('./routes/emails'));
 // Configure the navigation bar in Keystone's Admin UI
 keystone.set('nav', {
 	'Ensemblr Settings': ['theatres', 'shows', 'productions', 'prices'],
+	'Lyrics Bots': ['LyricShow', 'LyricSong', 'Lyric'],
 	'users': 'users',
 });
 

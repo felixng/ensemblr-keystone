@@ -7,6 +7,7 @@ var Weekday = new keystone.List('Weekday', {
 	map: { name: 'name' },
     autokey: { path: 'slug', from: 'name', unique: true },
     defaultSort: '-lastUpdated',
+    hidden: true,
 });
 
 Weekday.add({

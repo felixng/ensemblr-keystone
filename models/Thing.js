@@ -6,6 +6,7 @@ var Thing = new keystone.List('Thing', {
 	singular: 'Thing',
 	plural: 'Things',
 	autokey: { from: 'name', path: 'autokey', unique: true },
+	hidden: true,
 });
 
 Thing.add(
