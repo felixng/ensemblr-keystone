@@ -102,13 +102,18 @@ var getTheatres = function(){
   var url = process.env.THEATRES_IMPORTER_URL;
 
   client.get(url, args, function (data, response) {
-      var theatres = data.extractorData.data[0].group;
-      var count = Object.keys(theatres).length;
+      if (data && data.extractorData && data.extractorData.data){
+          var theatres = data.extractorData.data[0].group;
+          var count = Object.keys(theatres).length;
 
-      for (var i = 0; i < count; i++) {
-          var theatre = parseTheatre(theatres[i].Name[0]);
-          createTheatre(theatre);  
-      };
+          for (var i = 0; i < count; i++) {
+              var theatre = parseTheatre(theatres[i].Name[0]);
+              createTheatre(theatre);  
+          };
+      }
+      else {
+        console.log(data);
+      }
 
   });
 }
