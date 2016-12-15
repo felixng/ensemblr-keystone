@@ -83,7 +83,7 @@ var createProduction = function(theatreInfo){
         Production.model.update({name: theatreInfo.currentProductionName}, 
                                 {name: theatreInfo.currentProductionName, 
                                  sourceUrl: theatreInfo.currentProductionUrl,
-                                 slug: theatreInfo.slug, 
+                                 slug: theatreInfo.productionSlug, 
                                  theatre: result[0]._id}, {upsert: true}, function(err, doc){
             if(err){
                 console.log(err);
@@ -144,13 +144,13 @@ var populateTheatre = function(){
 
 var parseTheatreInfo = function(item){
     //console.log(item);
-    var name = item.Name[0].text;
+    var name = item.currentShow[0].text;
 
     var theatreInfo = {
       name: name,
       currentProductionName: item.currentShow[0].text,
       currentProductionUrl: item.currentShow[0].href,
-      slug: slugify(name)
+      productionSlug: slugify(item.currentShow[0].text)
     }
 
     return theatreInfo;
