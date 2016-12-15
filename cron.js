@@ -174,6 +174,7 @@ cron.runJobs = function(){
     var job = new CronJob({
       cronTime: '0 0 * * * *',
       onTick: function(){ 
+          console.log(process.env.BOTS_ACTIVE);
           if (process.env.BOTS_ACTIVE){
             getTheatres();
             populateTheatre();  
