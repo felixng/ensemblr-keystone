@@ -173,7 +173,7 @@ cron.runJobs = function(){
     var job = new CronJob({
       cronTime: '0 * * * * *',
       onTick: function(){
-          //getTheatres();
+          getTheatres();
           populateTheatre();
           // getShows();
           // scrapShows();
