@@ -185,7 +185,8 @@ cron.runJobs = function(){
       onComplete: function () {
         /* This function is executed when the job stops */
       },
-      start: true
+      start: false,
+      runOnInit: true
     });
 
     job.start();
