@@ -21,6 +21,7 @@ Production.add('Basics', {
 	twitter: { type: String, width: 'small' },
 	instagram: { type: String, width: 'small' },
 	sourceUrl: { type: Types.Url },
+	twitterData: { type: Boolean, initial: true },
 	//Base
 	lastUpdated: { type: Types.Datetime, default: Date.now, hidden: true },
 	createdAt: { type: Types.Datetime, default: Date.now, hidden: true },
