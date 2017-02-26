@@ -12,7 +12,8 @@
     "node-rest-client": "^2.0.1",
     "node-sass": "^3.3.2",
     "node-sass-middleware": "^0.9.7",
-    "redis-server": "0.0.3"
+    "redis-server": "0.0.3",
+    "restful-keystone": "^0.3.0"
   },
   "devDependencies": {
     "eslint": "^2.12.0",
