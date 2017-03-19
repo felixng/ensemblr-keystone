@@ -108,7 +108,7 @@ var getTheatres = function(){
 
           for (var i = 0; i < count; i++) {
               var theatre = parseTheatre(theatres[i].Name[0]);
-              createTheatre(theatre);  
+              createTheatre(theatre);
           };
       }
       else {
@@ -181,8 +181,8 @@ cron.runJobs = function(){
       onTick: function(){ 
           console.log(process.env.BOTS_ACTIVE);
           if (process.env.BOTS_ACTIVE){
-            getTheatres();
-            populateTheatre();  
+            // getTheatres();
+            // populateTheatre();  
           }
           // getShows();
           // scrapShows();
