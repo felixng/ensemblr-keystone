@@ -24,6 +24,7 @@ Theatre.add({
 	sourceUrl: { type: Types.Url },
 	lastUpdated: { type: Types.Datetime, default: Date.now, hidden: true },
 	createdAt: { type: Types.Datetime, default: Date.now, hidden: true },
+	westEnd: { type: Boolean, initial: false },
 });
 
 Theatre.relationship({ path: 'productions', ref: 'Production', refPath: 'theatre' });
