@@ -36,5 +36,5 @@ Theatre.schema.pre('save', function(next) {
 });
 
 Theatre.track = true;
-Theatre.defaultColumns = 'name, createdAt|20%, lastUpdated|20%';
+Theatre.defaultColumns = 'name, westEnd, createdAt|20%, lastUpdated|20%';
 Theatre.register();
