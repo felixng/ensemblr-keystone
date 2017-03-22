@@ -2,6 +2,11 @@ var keystone = require('keystone');
 var CronJob = require('cron').CronJob;
 var ImportIO = require('./importio.js');
 var cron = module.exports = {};
+var curl = require('curl');
+var cheerio = require('cheerio')
+
+var botActive = process.env.BOTS_ACTIVE || true;
+
 
 var Client = require('node-rest-client').Client;
 var client = new Client();
@@ -63,7 +68,7 @@ var createShow = function(name, url){
 
 var createProduction = function(name, url){
     var Production = keystone.list('Production');
-    console.log("Updating " + url);
+    console.log("Updating " + name + " at  " + url);
 
     Production.model.update({name: name}, {sourceUrl: url}, {upsert: true}, function(err, doc){
         if(err){
@@ -73,119 +78,142 @@ var createProduction = function(name, url){
     });
 }
 
-var createProduction = function(theatreInfo){
+// var createProduction = function(theatreInfo){
+//     var Theatre = keystone.list('Theatre');
+//     var Production = keystone.list('Production');
+//     console.log("Updating " + theatreInfo.name);
+    
+//     Theatre.model.find().where('sourceUrl', theatreInfo.theatreUrl).exec(function(err, result){
+//         //console.log(result);
+
+//         Production.model.update({name: theatreInfo.currentProductionName}, 
+//                                 {name: theatreInfo.currentProductionName, 
+//                                  sourceUrl: theatreInfo.currentProductionUrl,
+//                                  slug: theatreInfo.productionSlug, 
+//                                  theatre: result[0]._id}, {upsert: true}, function(err, doc){
+//             if(err){
+//                 console.log(err);
+//             }
+
+//             console.log(doc);
+//         });    
+        
+//     });
+    
+// }
+
+var getProductionFromLondonTheatre = function(url){
+  curl.get(url, null, 
+    function(err, response, body){
+      let $ = cheerio.load(body);
+
+      var currentProductionRow = $(".views-row-1");
+      var node = currentProductionRow.find($(".ltg-show-booking")).children();
+      
+      var prodName = node.first('div');
+      var prodUrl = 'https://londontheatre.co.uk' + node.first('div').children().attr('href');
+      
+      createProduction(prodName.text(), prodUrl);
+    });
+}
+
+var createProductions = function(){
     var Theatre = keystone.list('Theatre');
     var Production = keystone.list('Production');
-    console.log("Updating " + theatreInfo.name);
     
-    Theatre.model.find().where('sourceUrl', theatreInfo.theatreUrl).exec(function(err, result){
+    Theatre.model.find({ 'westEnd': true }, function(err, records){
         //console.log(result);
+        // Production.model.update({name: theatreInfo.currentProductionName}, 
+        //                         {name: theatreInfo.currentProductionName, 
+        //                          sourceUrl: theatreInfo.currentProductionUrl,
+        //                          slug: theatreInfo.productionSlug, 
+        //                          theatre: result[0]._id}, {upsert: true}, 
+        //                          function(err, doc){
+        //     if(err){
+        //         console.log(err);
+        //     }
 
-        Production.model.update({name: theatreInfo.currentProductionName}, 
-                                {name: theatreInfo.currentProductionName, 
-                                 sourceUrl: theatreInfo.currentProductionUrl,
-                                 slug: theatreInfo.productionSlug, 
-                                 theatre: result[0]._id}, {upsert: true}, function(err, doc){
-            if(err){
-                console.log(err);
-            }
-
-            console.log(doc);
-        });    
-        
-    });
-    
-}
-
-var getTheatres = function(){
-  console.log('getTheatres');
-  var url = process.env.THEATRES_IMPORTER_URL;
-
-  client.get(url, args, function (data, response) {
-      if (data && data.extractorData && data.extractorData.data){
-          var theatres = data.extractorData.data[0].group;
-          var count = Object.keys(theatres).length;
-
-          for (var i = 0; i < count; i++) {
-              var theatre = parseTheatre(theatres[i].Name[0]);
-              createTheatre(theatre);
-          };
-      }
-      else {
-        console.log(data);
-      }
-
-  });
-}
-
-var populateTheatre = function(){
-  console.log('populateTheatre');
-  
-  var Theatre = keystone.list('Theatre');
-  var extractorId = process.env.IMPORTIO_THEATRE_EXTRACTOR;
-  //Theatre.model.find().where('name', 'Apollo Theatre').exec(function(err, result){
-  Theatre.model.find().exec(function(err, result){
-    result.forEach(function(theatre){
-        var url = ImportIO.parseEndPoint(theatre.sourceUrl, extractorId);
-        //console.log(url);
-        client.get(url, args, function (data, response) {
-          if (data && data.extractorData && data.extractorData.data){
-
-            var theatreNode = data.extractorData.data[0].group[0];
-            var theatreInfo = parseTheatreInfo(theatreNode);
-            theatreInfo.theatreUrl = data.extractorData.url;
-
-            createProduction(theatreInfo); 
-          }
-          else{
-            console.log(data);
-          }
-            
+        //     console.log(doc);
+        // });    
+        records.forEach(function(doc){
+          createProductionFromLondonTheatre(doc.sourceUrl);
         });
     });
+    
+}
+
+
+// var getTheatres = function(){
+//   var url = process.env.THEATRES_IMPORTER_URL;
+
+//   client.get(url, args, function (data, response) {
+//       if (data && data.extractorData && data.extractorData.data){
+//           var theatres = data.extractorData.data[0].group;
+//           var count = Object.keys(theatres).length;
+
+//           for (var i = 0; i < count; i++) {
+//               var theatre = parseTheatre(theatres[i].Name[0]);
+//               createTheatre(theatre);
+//           };
+//       }
+//       else {
+//         console.log(data);
+//       }
+
+//   });
+// }
+
+// var populateTheatre = function(){
+//   console.log('populateTheatre');
+  
+//   var Theatre = keystone.list('Theatre');
+//   var extractorId = process.env.IMPORTIO_THEATRE_EXTRACTOR;
+//   //Theatre.model.find().where('name', 'Apollo Theatre').exec(function(err, result){
+//   Theatre.model.find().exec(function(err, result){
+//     result.forEach(function(theatre){
+//         var url = ImportIO.parseEndPoint(theatre.sourceUrl, extractorId);
+//         //console.log(url);
+//         client.get(url, args, function (data, response) {
+//           if (data && data.extractorData && data.extractorData.data){
+
+//             var theatreNode = data.extractorData.data[0].group[0];
+//             var theatreInfo = parseTheatreInfo(theatreNode);
+//             theatreInfo.theatreUrl = data.extractorData.url;
+
+//             createProduction(theatreInfo); 
+//           }
+//           else{
+//             console.log(data);
+//           }
+            
+//         });
+//     });
 
     
-  })
-}
+//   })
+// }
 
-var parseTheatreInfo = function(item){
-    //console.log(item);
-    var name = item.currentShow[0].text;
+// var parseTheatreInfo = function(item){
+//     //console.log(item);
+//     var name = item.currentShow[0].text;
 
-    var theatreInfo = {
-      name: name,
-      currentProductionName: item.currentShow[0].text,
-      currentProductionUrl: item.currentShow[0].href,
-      productionSlug: slugify(item.currentShow[0].text)
-    }
+//     var theatreInfo = {
+//       name: name,
+//       currentProductionName: item.currentShow[0].text,
+//       currentProductionUrl: item.currentShow[0].href,
+//       productionSlug: slugify(item.currentShow[0].text)
+//     }
 
-    return theatreInfo;
-}
-
-var parseTheatre = function(item){
-    var name = item.text; 
-    // var slug = slugify(name);
-
-    var theatre = {
-      name: item.text,
-      sourceUrl: item.href,
-      // currentProduction: '583b7923772767cfdaa5fbce'
-    };
-
-    return theatre;
-}  
+//     return theatreInfo;
+// }
 
 cron.runJobs = function(){
     var job = new CronJob({
       cronTime: '0 0 * * * *',
       onTick: function(){ 
-          console.log(process.env.BOTS_ACTIVE);
-          if (process.env.BOTS_ACTIVE){
-            // getTheatres();
-            // populateTheatre();  
+          if (botActive){
+            createProductions();
           }
-          // getShows();
-          // scrapShows();
       },
       onComplete: function () {
         /* This function is executed when the job stops */
