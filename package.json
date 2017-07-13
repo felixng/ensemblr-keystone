@@ -1,6 +1,6 @@
 {
   "name": "ensemblr",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "private": true,
   "dependencies": {
     "async": "^1.5.0",
@@ -16,6 +16,10 @@
     "node-sass-middleware": "^0.9.7",
     "redis-server": "0.0.3",
     "restful-keystone": "^0.3.0"
+  },
+  "engines": {
+    "npm": ">=3",
+    "node": "6.11.1"
   },
   "devDependencies": {
     "eslint": "^2.12.0",
